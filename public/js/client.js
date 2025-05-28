@@ -37,7 +37,14 @@ socket.on('update', function(msg) {
 });
 
 socket.on('listaPlayers', function(msg) {
-	players["player" + msg.player.i] = new Player(msg.player.x, msg.player.y, msg.player.username);
+    // Clear existing players
+    players = {};
+    
+    // Add all players from the received list
+    for (let playerId in msg.players) {
+        const player = msg.players[playerId];
+        players[playerId] = new Player(player.x, player.y, player.username);
+    }
 });
 
 socket.on('remove', function(msg) {

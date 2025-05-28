@@ -77,10 +77,9 @@ const jogadores = (obj) => {
 io.on('connection', (client) => {
 	let i = ++count; //assign number
     players['player'+i] = new Player(1, 1, i, ''); //create new player with empty username
-    for( let player in players ) { //send initial update
-		client.emit('listaPlayers', { player: players[player] });
-		client.broadcast.emit('listaPlayers', { player: players[player] });
-	}
+    
+    // Send complete list of players to all clients
+    io.emit('listaPlayers', { players: players });
 	
 	client.on('move', (message) => {
         console.log('movimento:'+message.direcao + ' player:' + message.meuPlayer);
