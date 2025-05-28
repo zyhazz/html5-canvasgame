@@ -1,5 +1,5 @@
 
-var socket  = io.connect('http://192.168.0.101:8080');
+var socket  = io();
 var meuPlayer = 0;
 function Player (x,y) {
     this.x = x;

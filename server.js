@@ -12,10 +12,12 @@ app.get('/', (req, res) => {
 });
 
 let players = {}, count = 0;
-const Player = (x, y, i) => {
-	this.i = i;
-    this.x = x;
-    this.y = y;
+class Player {
+	constructor(x, y, i) {
+		this.i = i;
+		this.x = x;
+		this.y = y;
+	}
 }
 
 const jogadores = (obj) => {
