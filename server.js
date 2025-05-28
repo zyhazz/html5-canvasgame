@@ -71,9 +71,17 @@ io.on('connection', (client) => {
     });
 	
     client.on('disconnect', () => {
-		console.log('desconectado cliente ' + client.username);
-		delete players[client.username];
-		client.broadcast.emit('remove', { player: client.username });
+        if (client.username && players[client.username]) {
+            console.log(`Player ${client.username} disconnected. Total players: ${jogadores(players)}`);
+            const removedPlayer = players[client.username];
+            delete players[client.username];
+            client.broadcast.emit('remove', { 
+                player: client.username,
+                playerData: removedPlayer
+            });
+        } else {
+            console.log('Unknown client disconnected');
+        }
     })
 });
 
