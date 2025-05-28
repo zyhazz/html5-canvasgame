@@ -1,5 +1,7 @@
 var socket = io();
 var meuPlayer = 0;
+var storedUsername = sessionStorage.getItem('gameUsername'); // Store username in localStorage
+
 function Player(x, y, username) {
     this.x = x;
     this.y = y;
@@ -8,14 +10,19 @@ function Player(x, y, username) {
 
 var players = {};
 
-// Show username prompt on connection
+// Show username prompt only on first connection
 socket.on('connect', function() {
-    const username = prompt('Please enter your username:');
-    if (username) {
-        socket.emit('registrar', { username: username });
-    } else {
-        socket.emit('registrar', { username: 'Player' + Math.floor(Math.random() * 1000) });
+    if (!storedUsername) {
+        const username = prompt('Please enter your username:');
+        if (username) {
+            storedUsername = username;
+            localStorage.setItem('gameUsername', username);
+        } else {
+            storedUsername = 'Player' + Math.floor(Math.random() * 1000);
+            localStorage.setItem('gameUsername', storedUsername);
+        }
     }
+    socket.emit('registrar', { username: storedUsername });
     console.log('Connected!');
 });
 
