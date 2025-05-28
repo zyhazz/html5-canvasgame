@@ -8,7 +8,7 @@ const io = new Server(server);
 app.use(express.static(__dirname + '/public'));
 
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
+    res.sendFile(__dirname + '/public/index.html');
 });
 
 let players = {}, count = 0;
