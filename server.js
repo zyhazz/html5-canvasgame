@@ -13,10 +13,11 @@ app.get('/', (req, res) => {
 
 let players = {}, count = 0;
 class Player {
-	constructor(x, y, i) {
+	constructor(x, y, i, username) {
 		this.i = i;
 		this.x = x;
 		this.y = y;
+		this.username = username;
 	}
 }
 
@@ -30,7 +31,7 @@ const jogadores = (obj) => {
  
 io.on('connection', (client) => {
 	let i = ++count; //assign number
-    players['player'+i] = new Player( 1, 1, i ); //create new player 
+    players['player'+i] = new Player(1, 1, i, ''); //create new player with empty username
     for( let player in players ) { //send initial update
 		client.emit('listaPlayers', { player: players[player] });
 		client.broadcast.emit('listaPlayers', { player: players[player] });
@@ -66,9 +67,10 @@ io.on('connection', (client) => {
 	
 	client.on('registrar', (message) => {
 		console.log("registro " + i + 'tamanho:' + jogadores(players));
+		players['player' + i].username = message.username;
         client.emit('registroOk', { player: players['player' + i] });
 		client.username = 'player'+i;
-    });
+	});
 	
     client.on('disconnect', () => {
         if (client.username && players[client.username]) {

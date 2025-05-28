@@ -183,9 +183,16 @@
 				for (var i in players) {
 					var playerX = players[i].x * tileW * tamanhoFinal;
 					var playerY = players[i].y * tileH * tamanhoFinal;
-					//console.log(playerX+':'+playerY);
-					var playerTX = Math.floor(tileId % tilesPorLinha) * tileW;
-					var playerTY = Math.floor(tileId / tilesPorLinha) * tileH;
+					
+					// Draw username above player
+					ctx.font = '12px Arial';
+					ctx.fillStyle = 'white';
+					ctx.strokeStyle = 'black';
+					ctx.lineWidth = 3;
+					ctx.strokeText(players[i].username, playerX, playerY - 5);
+					ctx.fillText(players[i].username, playerX, playerY - 5);
+					
+					// Draw player
 					ctx.drawImage(tiles,
 						16, 16, //sx,sy
 						16, 16, //sw,sh
