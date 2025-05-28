@@ -1,194 +1,205 @@
 <!doctype html>
 <html>
-  <head>
-	<meta name = "viewport" content = "initial-scale = 1.0, user-scalable = no">
-    <meta charset="UTF-8" />
-    <title>Canvas Test</title>
-  </head>
-  <style type="text/css">
+
+<head>
+	<meta name="viewport" content="initial-scale = 1.0, user-scalable = no">
+	<meta charset="UTF-8" />
+	<title>Canvas Test</title>
+</head>
+<style type="text/css">
 	html {
-	overflow:hidden;
+		overflow: hidden;
 	}
-	
-	.down{
-		transform:rotate(90deg);
-		-ms-transform:rotate(90deg); /* IE 9 */
-		-moz-transform:rotate(90deg); /* Firefox */
-		-webkit-transform:rotate(90deg); /* Safari and Chrome */
-		-o-transform:rotate(90deg); /* Opera */
+
+	.down {
+		transform: rotate(90deg);
+		-ms-transform: rotate(90deg);
+		/* IE 9 */
+		-moz-transform: rotate(90deg);
+		/* Firefox */
+		-webkit-transform: rotate(90deg);
+		/* Safari and Chrome */
+		-o-transform: rotate(90deg);
+		/* Opera */
 	}
-	
-	.up{
-		transform:rotate(-90deg);
-		-ms-transform:rotate(-90deg); /* IE 9 */
-		-moz-transform:rotate(-90deg); /* Firefox */
-		-webkit-transform:rotate(-90deg); /* Safari and Chrome */
-		-o-transform:rotate(-90deg); /* Opera */
+
+	.up {
+		transform: rotate(-90deg);
+		-ms-transform: rotate(-90deg);
+		/* IE 9 */
+		-moz-transform: rotate(-90deg);
+		/* Firefox */
+		-webkit-transform: rotate(-90deg);
+		/* Safari and Chrome */
+		-o-transform: rotate(-90deg);
+		/* Opera */
 	}
-	
-	.right{
-		transform:rotate(-180deg);
-		-ms-transform:rotate(-180deg); /* IE 9 */
-		-moz-transform:rotate(-180deg); /* Firefox */
-		-webkit-transform:rotate(-180deg); /* Safari and Chrome */
-		-o-transform:rotate(-180deg); /* Opera */
+
+	.right {
+		transform: rotate(-180deg);
+		-ms-transform: rotate(-180deg);
+		/* IE 9 */
+		-moz-transform: rotate(-180deg);
+		/* Firefox */
+		-webkit-transform: rotate(-180deg);
+		/* Safari and Chrome */
+		-o-transform: rotate(-180deg);
+		/* Opera */
 	}
-  </style>
+</style>
+
 <body>
-  <section>
-    <div>
-        <canvas id="canvas" width="512" height=512">
-         This text is displayed if your browser 
-         does not support HTML5 Canvas.
-        </canvas>
-    </div>
-	<div id="">
-	</div>
+	<section>
+		<div>
+			<canvas id="canvas" width="512" height=512">
+				This text is displayed if your browser
+				does not support HTML5 Canvas.
+			</canvas>
+		</div>
+		<div id="">
+		</div>
 
-	<script src="/socket.io/socket.io.js"></script>
-	<script src="js/client.js"></script>
+		<script src="/socket.io/socket.io.js"></script>
+		<script src="js/client.js"></script>
 
-<script type="text/javascript">
-//tamanho do canvas
-var W = 512;
-var H = 512;
+		<script type="text/javascript">
+			//tamanho do canvas
+			var W = 512;
+			var H = 512;
 
-//tamanho dos tiles
-var tileW = 16;
-var tileH = 16;
-var tilesPorLinha = 32;
-var tamanhoFinal = 2;//fator multiplicador
+			//tamanho dos tiles
+			var tileW = 16;
+			var tileH = 16;
+			var tilesPorLinha = 32;
+			var tamanhoFinal = 2;//fator multiplicador
 
 
-//mapa
-var map = new Array(
-	[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-	[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-	[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-	[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-	[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-	[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-	[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-	[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-	[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-	[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-	[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-	[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-	[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-	[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-	[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-	[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-);
-var mapObjetos = new Array(
-	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,34,0,0,0,0,34,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0,0,34,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-);
+			//mapa
+			var map = new Array(
+				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+			);
+			var mapObjetos = new Array(
+				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 34, 0, 0, 0, 0, 34, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+			);
+			document.onkeydown = function (e) {
+				e = e ? e : window.event;
 
-	
-//listener do teclado
-// listener do teclado
-    document.onkeydown = function(e) {
-      e = e?e:window.event;
-      
-      switch (e.keyCode) {
-        // up
-        case 38:
-			movePlayer("up");
-        break;
-        // down
-        case 40:
-			movePlayer("down");
-        break;
-        // left
-        case 37:
-			movePlayer("left");
-        break;
-        // right
-        case 39:
-			movePlayer("right");
-        break;
-      }
-    }
-//processa movimento do player
-function movePlayer(direcao){
-	socket.emit('move', { direcao: direcao , meuPlayer: meuPlayer});
-}
+				switch (e.keyCode) {
+					// up
+					case 38:
+						movePlayer("up");
+						break;
+					// down
+					case 40:
+						movePlayer("down");
+						break;
+					// left
+					case 37:
+						movePlayer("left");
+						break;
+					// right
+					case 39:
+						movePlayer("right");
+						break;
+				}
+			}
+			//processa movimento do player
+			function movePlayer(direcao) {
+				socket.emit('move', { direcao: direcao, meuPlayer: meuPlayer });
+			}
 
-//carregamento do tile
-var tiles = new Image();
-tiles.addEventListener('load', tileLoad, false);
-tiles.src = "res/tile.png";
-function tileLoad() {
-      console.log('tiles carregados');   
-}
-//fim do carregamento do tile
+			//carregamento do tile
+			var tiles = new Image();
+			tiles.addEventListener('load', tileLoad, false);
+			tiles.src = "res/tile.png";
+			function tileLoad() {
+				console.log('tiles carregados');
+			}
+			//fim do carregamento do tile
 
-//limpa area
-function clear() {
-  ctx.clearRect(0, 0, W, H);
-}
-//fim limpa area
-function init() {
-  canvas = document.getElementById("canvas");
-  ctx = canvas.getContext("2d");
-  //draw();
-  return setInterval(draw, 10);
-}
+			//limpa area
+			function clear() {
+				ctx.clearRect(0, 0, W, H);
+			}
+			//fim limpa area
+			function init() {
+				canvas = document.getElementById("canvas");
+				ctx = canvas.getContext("2d");
+				//draw();
+				return setInterval(draw, 10);
+			}
 
-function draw() {
-  clear();
-  //context . drawImage(imagem, sx, sy, sw, sh, dx, dy, dw, dh)
-  //desenha mapa
-  for(i=0; i < 16; i++){
-		for(j = 0; j < 16; j++){
-			var tileId = map[j][i];
-			var tileX = Math.floor(tileId % tilesPorLinha) * tileW;
-			var tileY = Math.floor(tileId / tilesPorLinha) * tileH;
-			ctx.drawImage(tiles,tileX,tileY,tileW,tileH,i * tileW * tamanhoFinal,j * tileH * tamanhoFinal,tileW * tamanhoFinal,tileH*tamanhoFinal);
-			
-			var tileId = mapObjetos[j][i];//objetos
-			var tileX = Math.floor(tileId % tilesPorLinha) * tileW;
-			var tileY = Math.floor(tileId / tilesPorLinha) * tileH;
-			ctx.drawImage(tiles,tileX,tileY,tileW,tileH,i * tileW * tamanhoFinal,j * tileH * tamanhoFinal,tileW * tamanhoFinal,tileH*tamanhoFinal);
-			//console.log(tileX,tileY,tileW,tileH,i * tileW,j * tileH,tileW * tamanhoFinal,tileH*tamanhoFinal);
-		}
-  }
-  
-  //desenhaplayer
-  var playerTile = 33;
-  for( var i in players ) { 
-		var playerX = players[i].x * tileW * tamanhoFinal;
-		var playerY = players[i].y * tileH * tamanhoFinal;
-		//console.log(playerX+':'+playerY);
-		var playerTX = Math.floor(tileId % tilesPorLinha) * tileW;
-		var playerTY = Math.floor(tileId / tilesPorLinha) * tileH;
-		ctx.drawImage(tiles,
-					16,16, //sx,sy
-					16,16, //sw,sh
-					playerX,playerY, //dx,dy
-					32,32  //dw,dh
-		);
-	}
-  
-}
+			function draw() {
+				clear();
+				//context . drawImage(imagem, sx, sy, sw, sh, dx, dy, dw, dh)
+				//desenha mapa
+				for (i = 0; i < 16; i++) {
+					for (j = 0; j < 16; j++) {
+						var tileId = map[j][i];
+						var tileX = Math.floor(tileId % tilesPorLinha) * tileW;
+						var tileY = Math.floor(tileId / tilesPorLinha) * tileH;
+						ctx.drawImage(tiles, tileX, tileY, tileW, tileH, i * tileW * tamanhoFinal, j * tileH * tamanhoFinal, tileW * tamanhoFinal, tileH * tamanhoFinal);
 
-init();
-</script>
+						var tileId = mapObjetos[j][i];//objetos
+						var tileX = Math.floor(tileId % tilesPorLinha) * tileW;
+						var tileY = Math.floor(tileId / tilesPorLinha) * tileH;
+						ctx.drawImage(tiles, tileX, tileY, tileW, tileH, i * tileW * tamanhoFinal, j * tileH * tamanhoFinal, tileW * tamanhoFinal, tileH * tamanhoFinal);
+						//console.log(tileX,tileY,tileW,tileH,i * tileW,j * tileH,tileW * tamanhoFinal,tileH*tamanhoFinal);
+					}
+				}
 
-  </section>
+				//desenhaplayer
+				var playerTile = 33;
+				for (var i in players) {
+					var playerX = players[i].x * tileW * tamanhoFinal;
+					var playerY = players[i].y * tileH * tamanhoFinal;
+					//console.log(playerX+':'+playerY);
+					var playerTX = Math.floor(tileId % tilesPorLinha) * tileW;
+					var playerTY = Math.floor(tileId / tilesPorLinha) * tileH;
+					ctx.drawImage(tiles,
+						16, 16, //sx,sy
+						16, 16, //sw,sh
+						playerX, playerY, //dx,dy
+						32, 32  //dw,dh
+					);
+				}
+
+			}
+
+			init();
+		</script>
+
+	</section>
 </body>
+
 </html>
