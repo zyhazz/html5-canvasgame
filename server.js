@@ -1,32 +1,40 @@
-var io = require('socket.io');
-var socket = io.listen(8080);
-socket.set('log level', 1);//tira mensagens chatas de debug
-var players = {}, count = 0;
-function Player (x, y, i) {
+const { Server } = require("socket.io");
+const express = require('express');
+const { createServer } = require('node:http');
+const app = express();
+const server = createServer(app);
+const io = new Server(server);
+
+app.use(express.static(__dirname + '/public'));
+
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/index.html');
+});
+
+let players = {}, count = 0;
+const Player = (x, y, i) => {
 	this.i = i;
     this.x = x;
     this.y = y;
 }
 
-function jogadores(obj) { //quantos online (coisa feia)
-    var size = 0, key;
+const jogadores = (obj) => {
+    let size = 0, key;
     for (key in obj) {
         if (obj.hasOwnProperty(key)) size++;
     }
     return size;
 }; 
  
-socket.on('connection', function(client){
-    
-	
-	var i = ++count; //assign number
+io.on('connection', (client) => {
+	let i = ++count; //assign number
     players['player'+i] = new Player( 1, 1, i ); //create new player 
-    for( var player in players ) { //send initial update
+    for( let player in players ) { //send initial update
 		client.emit('listaPlayers', { player: players[player] });
 		client.broadcast.emit('listaPlayers', { player: players[player] });
 	}
 	
-	client.on('move', function(message){
+	client.on('move', (message) => {
         console.log('movimento:'+message.direcao + ' player:' + message.meuPlayer);
 		
 		if(message.direcao == 'left'){
@@ -54,17 +62,19 @@ socket.on('connection', function(client){
 		client.broadcast.emit('update', { player: players['player' + message.meuPlayer] });
     })
 	
-	client.on('registrar', function(message){
+	client.on('registrar', (message) => {
 		console.log("registro " + i + 'tamanho:' + jogadores(players));
         client.emit('registroOk', { player: players['player' + i] });
 		client.username = 'player'+i;
-
     });
 	
-    client.on('disconnect', function(){
-
+    client.on('disconnect', () => {
 		console.log('desconectado cliente ' + client.username);
 		delete players[client.username];
 		client.broadcast.emit('remove', { player: client.username });
     })
+});
+
+server.listen(8080, () => {
+    console.log('server is running on port 8080');
 });

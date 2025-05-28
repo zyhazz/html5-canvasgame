@@ -1,0 +1,27 @@
+{
+  "name": "html5-canvasgame",
+  "version": "0.0.1",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zyhazz/html5-canvasgame.git"
+  },
+  "author": {
+    "name": "Diego Carvalho",
+    "email": "zyhazz@gmail.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zyhazz/html5-canvasgame/issues"
+  },
+  "homepage": "https://github.com/zyhazz/html5-canvasgame#readme",
+  "description": "",
+  "dependencies": {
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1"
+  }
+}
