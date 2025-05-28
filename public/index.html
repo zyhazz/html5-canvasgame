@@ -73,44 +73,34 @@
 			var tilesPorLinha = 32;
 			var tamanhoFinal = 2;//fator multiplicador
 
-
 			//mapa
-			var map = new Array(
-				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-				[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-			);
-			var mapObjetos = new Array(
-				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-				[0, 0, 0, 0, 0, 0, 34, 0, 0, 0, 0, 34, 0, 0, 0, 0],
-				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34, 0, 0, 0, 0],
-				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-			);
+			var map = [];
+			var mapObjetos = [];
+			var collisionEffect = false;
+			var collisionTimer = null;
+
+			// Fetch map data from server
+			fetch('/api/map')
+				.then(response => response.json())
+				.then(data => {
+					map = data.baseMap;
+					mapObjetos = data.objectMap;
+					init(); // Initialize game after map is loaded
+				})
+				.catch(error => console.error('Error loading map:', error));
+
+			// Handle collision events
+			socket.on('collision', function(msg) {
+				if (msg.player.i === meuPlayer) {
+					// Visual feedback for collision
+					collisionEffect = true;
+					if (collisionTimer) clearTimeout(collisionTimer);
+					collisionTimer = setTimeout(() => {
+						collisionEffect = false;
+					}, 200);
+				}
+			});
+
 			document.onkeydown = function (e) {
 				e = e ? e : window.event;
 
@@ -192,7 +182,14 @@
 					ctx.strokeText(players[i].username, playerX, playerY - 5);
 					ctx.fillText(players[i].username, playerX, playerY - 5);
 					
-					// Draw player
+					// Draw player with collision effect if needed
+					if (collisionEffect && players[i].i === meuPlayer) {
+						ctx.globalAlpha = 0.5;
+						ctx.fillStyle = 'red';
+						ctx.fillRect(playerX, playerY, 32, 32);
+						ctx.globalAlpha = 1.0;
+					}
+					
 					ctx.drawImage(tiles,
 						16, 16, //sx,sy
 						16, 16, //sw,sh

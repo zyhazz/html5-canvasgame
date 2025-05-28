@@ -5,10 +5,55 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server);
 
+// Game map data
+const gameMap = {
+    baseMap: [
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    ],
+    objectMap: [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 34, 0, 0, 0, 0, 34, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+};
+
 app.use(express.static(__dirname + '/public'));
 
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
+});
+
+// Add endpoint to get map data
+app.get('/api/map', (req, res) => {
+    res.json(gameMap);
 });
 
 let players = {}, count = 0;
@@ -40,29 +85,36 @@ io.on('connection', (client) => {
 	client.on('move', (message) => {
         console.log('movimento:'+message.direcao + ' player:' + message.meuPlayer);
 		
+		let newX = players['player' + message.meuPlayer].x;
+		let newY = players['player' + message.meuPlayer].y;
+		
 		if(message.direcao == 'left'){
-			if(players['player' + message.meuPlayer].x > 0){
-				players['player' + message.meuPlayer].x = players['player' + message.meuPlayer].x - 1;
-			}
+			newX = Math.max(0, newX - 1);
 		}
 		if(message.direcao == 'right'){
-			if(players['player' + message.meuPlayer].x < 15){
-				players['player' + message.meuPlayer].x = players['player' + message.meuPlayer].x + 1;
-			}
+			newX = Math.min(15, newX + 1);
 		}
 		if(message.direcao == 'up'){
-			if(players['player' + message.meuPlayer].y > 0){
-				players['player' + message.meuPlayer].y = players['player' + message.meuPlayer].y - 1;
-			}
+			newY = Math.max(0, newY - 1);
 		}
 		if(message.direcao == 'down'){
-			if(players['player' + message.meuPlayer].y < 15){
-				players['player' + message.meuPlayer].y = players['player' + message.meuPlayer].y + 1;
-			}
+			newY = Math.min(15, newY + 1);
 		}
-		
-		client.emit('update', { player: players['player' + message.meuPlayer] });
-		client.broadcast.emit('update', { player: players['player' + message.meuPlayer] });
+
+		// Check for collision with objects
+		if (gameMap.objectMap[newY][newX] === 0) {
+			players['player' + message.meuPlayer].x = newX;
+			players['player' + message.meuPlayer].y = newY;
+			
+			client.emit('update', { player: players['player' + message.meuPlayer] });
+			client.broadcast.emit('update', { player: players['player' + message.meuPlayer] });
+		} else {
+			// Send collision event to the client
+			client.emit('collision', { 
+				player: players['player' + message.meuPlayer],
+				objectType: gameMap.objectMap[newY][newX]
+			});
+		}
     })
 	
 	client.on('registrar', (message) => {
