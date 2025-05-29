@@ -56,7 +56,7 @@ app.get('/api/map', (req, res) => {
     res.json(gameMap);
 });
 
-let players = {}, count = 0;
+let players = new Map();
 class Player {
 	constructor(x, y, i, username) {
 		this.i = i;
@@ -66,26 +66,21 @@ class Player {
 	}
 }
 
-const jogadores = (obj) => {
-    let size = 0, key;
-    for (key in obj) {
-        if (obj.hasOwnProperty(key)) size++;
-    }
-    return size;
-}; 
+const jogadores = (map) => map.size;
  
 io.on('connection', (client) => {
-	let i = ++count; //assign number
-    players['player'+i] = new Player(1, 1, i, ''); //create new player with empty username
+	const id = client.id;
+    players.set('player-'+id, new Player(1, 1, id, '')); //create new player with empty username
     
     // Send complete list of players to all clients
-    io.emit('listaPlayers', { players: players });
+    io.emit('listaPlayers', { players: Object.fromEntries(players) });
 	
 	client.on('move', (message) => {
         console.log('movimento:'+message.direcao + ' player:' + message.meuPlayer);
 		
-		let newX = players['player' + message.meuPlayer].x;
-		let newY = players['player' + message.meuPlayer].y;
+		let player = players.get('player-' + message.meuPlayer);
+		let newX = player.x;
+		let newY = player.y;
 		
 		if(message.direcao == 'left'){
 			newX = Math.max(0, newX - 1);
@@ -102,34 +97,35 @@ io.on('connection', (client) => {
 
 		// Check for collision with objects
 		if (gameMap.objectMap[newY][newX] === 0) {
-			players['player' + message.meuPlayer].x = newX;
-			players['player' + message.meuPlayer].y = newY;
+			player.x = newX;
+			player.y = newY;
 			
-			client.emit('update', { player: players['player' + message.meuPlayer] });
-			client.broadcast.emit('update', { player: players['player' + message.meuPlayer] });
+			client.emit('update', { player: player });
+			client.broadcast.emit('update', { player: player });
 		} else {
 			// Send collision event to the client
 			client.emit('collision', { 
-				player: players['player' + message.meuPlayer],
+				player: player,
 				objectType: gameMap.objectMap[newY][newX]
 			});
 		}
     })
 	
 	client.on('registrar', (message) => {
-		console.log("registro " + i + 'tamanho:' + jogadores(players));
-		players['player' + i].username = message.username;
-        client.emit('registroOk', { player: players['player' + i] });
-		client.username = 'player'+i;
+		console.log("registro " + id + ' tamanho:' + players.size);
+		let player = players.get('player-'+id);
+		player.username = message.username;
+        client.emit('registroOk', { player: player });
+		client.username = 'player-'+id;
 	});
 	
     client.on('disconnect', () => {
-        if (client.username && players[client.username]) {
-            console.log(`Player ${client.username} disconnected. Total players: ${jogadores(players)}`);
-            const removedPlayer = players[client.username];
-            delete players[client.username];
+        if (client.username && players.has('player-'+id)) {
+            console.log(`Player ${client.username} disconnected. Total players: ${players.size}`);
+            const removedPlayer = players.get('player-'+id);
+            players.delete('player-'+id);
             client.broadcast.emit('remove', { 
-                player: client.username,
+                player: 'player-'+id,
                 playerData: removedPlayer
             });
         } else {
