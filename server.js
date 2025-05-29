@@ -120,14 +120,17 @@ io.on('connection', (client) => {
 	});
 	
     client.on('disconnect', () => {
-        if (client.username && players.has('player-'+id)) {
-            console.log(`Player ${client.username} disconnected. Total players: ${players.size}`);
+        if (players.has('player-'+id)) {
+            console.log(`Player ${id} disconnected. Total players: ${players.size}`);
             const removedPlayer = players.get('player-'+id);
             players.delete('player-'+id);
-            client.broadcast.emit('remove', { 
+            
+            io.emit('remove', { 
                 player: 'player-'+id,
                 playerData: removedPlayer
             });
+            
+            io.emit('listaPlayers', { players: Object.fromEntries(players) });
         } else {
             console.log('Unknown client disconnected');
         }
